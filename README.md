@@ -20,7 +20,7 @@ $captcha->CreateImage();
 
 ... will output an image, for example:
 <br>
-![http://cool-php-captcha.googlecode.com/files/example.jpg](http://cool-php-captcha.googlecode.com/files/example.jpg)
+![https://raw.githubusercontent.com/nimah79/cool-php-persian-captcha/master/example.png](https://raw.githubusercontent.com/nimah79/cool-php-persian-captcha/master/example.png)
 
 
 
