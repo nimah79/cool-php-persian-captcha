@@ -1,6 +1,6 @@
 <?php
 /**
- * RandomColor 1.0.3
+ * RandomColor 1.0.3.
  *
  * PHP port of David Merfield JavaScript randomColor
  * https://github.com/davidmerfield/randomColor
@@ -28,38 +28,37 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-
 class RandomColor
 {
-  static public $dictionary = null;
+    public static $dictionary = null;
 
-  public function __construct() {}
-
-  static public function one($options = array())
-  {
-    $h = self::_pickHue($options);
-    $s = self::_pickSaturation($h, $options);
-    $v = self::_pickBrightness($h, $s, $options);
-
-    return self::format(compact('h','s','v'), @$options['format']);
-  }
-
-  static public function many($count, $options = array())
-  {
-    $colors = array();
-
-    for ($i = 0; $i < $count; $i++)
+    public function __construct()
     {
-      $colors[] = self::one($options);
     }
 
-    return $colors;
-  }
-
-  static public function format($hsv, $format='hex')
-  {
-    switch ($format)
+    public static function one($options = [])
     {
+        $h = self::_pickHue($options);
+        $s = self::_pickSaturation($h, $options);
+        $v = self::_pickBrightness($h, $s, $options);
+
+        return self::format(compact('h', 's', 'v'), @$options['format']);
+    }
+
+    public static function many($count, $options = [])
+    {
+        $colors = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $colors[] = self::one($options);
+        }
+
+        return $colors;
+    }
+
+    public static function format($hsv, $format = 'hex')
+    {
+        switch ($format) {
       case 'hsv':
         return $hsv;
 
@@ -68,57 +67,53 @@ class RandomColor
 
       case 'hslCss':
         $hsl = self::hsv2hsl($hsv);
-        return 'hsl(' . $hsl['h'] . ',' . $hsl['s'] . '%,' . $hsl['l'] . '%)';
+
+        return 'hsl('.$hsl['h'].','.$hsl['s'].'%,'.$hsl['l'].'%)';
 
       case 'rgb':
         return self::hsv2rgb($hsv);
 
       case 'rgbCss':
-        return 'rgb(' . implode(',', self::hsv2rgb($hsv)) . ')';
+        return 'rgb('.implode(',', self::hsv2rgb($hsv)).')';
 
       case 'hex':
       default:
         return self::hsv2hex($hsv);
     }
-  }
-
-  static private function _pickHue($options)
-  {
-    $range = self::_getHueRange($options);
-
-    if (empty($range))
-    {
-      return 0;
     }
 
-    $hue = self::_rand($range, $options);
-
-    // Instead of storing red as two separate ranges,
-    // we group them, using negative numbers
-    if ($hue < 0)
+    private static function _pickHue($options)
     {
-      $hue = 360 + $hue;
+        $range = self::_getHueRange($options);
+
+        if (empty($range)) {
+            return 0;
+        }
+
+        $hue = self::_rand($range, $options);
+
+        // Instead of storing red as two separate ranges,
+        // we group them, using negative numbers
+        if ($hue < 0) {
+            $hue = 360 + $hue;
+        }
+
+        return $hue;
     }
 
-    return $hue;
-  }
-
-  static private function _pickSaturation($h, $options)
-  {
-    if (@$options['luminosity'] === 'random')
+    private static function _pickSaturation($h, $options)
     {
-      return self::_rand(array(0, 100), $options);
-    }
-    if (@$options['hue'] === 'monochrome')
-    {
-      return 0;
-    }
+        if (@$options['luminosity'] === 'random') {
+            return self::_rand([0, 100], $options);
+        }
+        if (@$options['hue'] === 'monochrome') {
+            return 0;
+        }
 
-    $colorInfo = self::_getColorInfo($h);
-    $range = $colorInfo['s'];
+        $colorInfo = self::_getColorInfo($h);
+        $range = $colorInfo['s'];
 
-    switch (@$options['luminosity'])
-    {
+        switch (@$options['luminosity']) {
       case 'bright':
         $range[0] = 55;
         break;
@@ -132,24 +127,20 @@ class RandomColor
         break;
     }
 
-    return self::_rand($range, $options);
-  }
-
-  static private function _pickBrightness($h, $s, $options)
-  {
-    if (@$options['luminosity'] === 'random')
-    {
-      $range = array(0, 100);
+        return self::_rand($range, $options);
     }
-    else
-    {
-      $range = array(
-        self::_getMinimumBrightness($h, $s),
-        100
-        );
 
-      switch (@$options['luminosity'])
-      {
+    private static function _pickBrightness($h, $s, $options)
+    {
+        if (@$options['luminosity'] === 'random') {
+            $range = [0, 100];
+        } else {
+            $range = [
+        self::_getMinimumBrightness($h, $s),
+        100,
+        ];
+
+            switch (@$options['luminosity']) {
         case 'dark':
           $range[1] = $range[0] + 20;
           break;
@@ -158,231 +149,208 @@ class RandomColor
           $range[0] = ($range[1] + $range[0]) / 2;
           break;
       }
-    }
-
-    return self::_rand($range, $options);
-  }
-
-  static private function _getHueRange($options)
-  {
-    $ranges = array();
-
-    if (isset($options['hue']))
-    {
-      if (!is_array($options['hue']))
-      {
-        $options['hue'] = array($options['hue']);
-      }
-
-      foreach ($options['hue'] as $hue)
-      {
-        if ($hue === 'random')
-        {
-          $ranges[] = array(0, 360);
         }
-        else if (isset(self::$dictionary[$hue]))
-        {
-          $ranges[] = self::$dictionary[$hue]['h'];
+
+        return self::_rand($range, $options);
+    }
+
+    private static function _getHueRange($options)
+    {
+        $ranges = [];
+
+        if (isset($options['hue'])) {
+            if (!is_array($options['hue'])) {
+                $options['hue'] = [$options['hue']];
+            }
+
+            foreach ($options['hue'] as $hue) {
+                if ($hue === 'random') {
+                    $ranges[] = [0, 360];
+                } elseif (isset(self::$dictionary[$hue])) {
+                    $ranges[] = self::$dictionary[$hue]['h'];
+                } elseif (is_numeric($hue)) {
+                    $hue = intval($hue);
+
+                    if ($hue <= 360 && $hue >= 0) {
+                        $ranges[] = [$hue, $hue];
+                    }
+                }
+            }
         }
-        else if (is_numeric($hue))
-        {
-          $hue = intval($hue);
 
-          if ($hue <= 360 && $hue >= 0)
-          {
-            $ranges[] = array($hue, $hue);
-          }
+        if (($l = count($ranges)) === 0) {
+            return [0, 360];
+        } elseif ($l === 1) {
+            return $ranges[0];
+        } else {
+            return $ranges[self::_rand([0, $l - 1], $options)];
         }
-      }
     }
 
-    if (($l = count($ranges)) === 0)
+    private static function _getMinimumBrightness($h, $s)
     {
-      return array(0, 360);
+        $colorInfo = self::_getColorInfo($h);
+        $bounds = $colorInfo['bounds'];
+
+        for ($i = 0, $l = count($bounds); $i < $l - 1; $i++) {
+            $s1 = $bounds[$i][0];
+            $v1 = $bounds[$i][1];
+            $s2 = $bounds[$i + 1][0];
+            $v2 = $bounds[$i + 1][1];
+
+            if ($s >= $s1 && $s <= $s2) {
+                $m = ($v2 - $v1) / ($s2 - $s1);
+                $b = $v1 - $m * $s1;
+
+                return $m * $s + $b;
+            }
+        }
+
+        return 0;
     }
-    else if ($l === 1)
+
+    private static function _getColorInfo($h)
     {
-      return $ranges[0];
+        // Maps red colors to make picking hue easier
+        if ($h >= 334 && $h <= 360) {
+            $h -= 360;
+        }
+
+        foreach (self::$dictionary as $color) {
+            if ($color['h'] !== null && $h >= $color['h'][0] && $h <= $color['h'][1]) {
+                return $color;
+            }
+        }
     }
-    else
+
+    private static function _rand($bounds, $options)
     {
-      return $ranges[self::_rand(array(0, $l-1), $options)];
+        if (isset($options['prng'])) {
+            return $options['prng']($bounds[0], $bounds[1]);
+        } else {
+            return mt_rand($bounds[0], $bounds[1]);
+        }
     }
-  }
 
-  static private function _getMinimumBrightness($h, $s)
-  {
-    $colorInfo = self::_getColorInfo($h);
-    $bounds = $colorInfo['bounds'];
-
-    for ($i = 0, $l = count($bounds); $i < $l - 1; $i++)
+    public static function hsv2hex($hsv)
     {
-      $s1 = $bounds[$i][0];
-      $v1 = $bounds[$i][1];
-      $s2 = $bounds[$i+1][0];
-      $v2 = $bounds[$i+1][1];
+        $rgb = self::hsv2rgb($hsv);
+        $hex = '#';
 
-      if ($s >= $s1 && $s <= $s2)
-      {
-        $m = ($v2 - $v1) / ($s2 - $s1);
-        $b = $v1 - $m * $s1;
-        return $m * $s + $b;
-      }
+        foreach ($rgb as $c) {
+            $hex .= str_pad(dechex($c), 2, '0', STR_PAD_LEFT);
+        }
+
+        return $hex;
     }
 
-    return 0;
-  }
-
-  static private function _getColorInfo($h)
-  {
-    // Maps red colors to make picking hue easier
-    if ($h >= 334 && $h <= 360)
+    public static function hsv2hsl($hsv)
     {
-      $h-= 360;
-    }
+        extract($hsv);
 
-    foreach (self::$dictionary as $color)
-    {
-      if ($color['h'] !== null && $h >= $color['h'][0] && $h <= $color['h'][1])
-      {
-        return $color;
-      }
-    }
-  }
+        $s /= 100;
+        $v /= 100;
+        $k = (2 - $s) * $v;
 
-  static private function _rand($bounds, $options)
-  {
-    if (isset($options['prng']))
-    {
-      return $options['prng']($bounds[0], $bounds[1]);
-    }
-    else
-    {
-      return mt_rand($bounds[0], $bounds[1]);
-    }
-  }
-
-  static public function hsv2hex($hsv)
-  {
-    $rgb = self::hsv2rgb($hsv);
-    $hex = '#';
-
-    foreach ($rgb as $c)
-    {
-      $hex.= str_pad(dechex($c), 2, '0', STR_PAD_LEFT);
-    }
-
-    return $hex;
-  }
-
-  static public function hsv2hsl($hsv)
-  {
-    extract($hsv);
-
-    $s/= 100;
-    $v/= 100;
-    $k = (2-$s)*$v;
-
-    return array(
+        return [
       'h' => $h,
-      's' => round($s*$v / ($k < 1 ? $k : 2-$k), 4) * 100,
-      'l' => $k/2 * 100,
-      );
-  }
+      's' => round($s * $v / ($k < 1 ? $k : 2 - $k), 4) * 100,
+      'l' => $k / 2 * 100,
+      ];
+    }
 
-  static public function hsv2rgb($hsv)
-  {
-    extract($hsv);
-
-    $h/= 360;
-    $s/= 100;
-    $v/= 100;
-
-    $i = floor($h * 6);
-    $f = $h * 6 - $i;
-
-    $m = $v * (1 - $s);
-    $n = $v * (1 - $s * $f);
-    $k = $v * (1 - $s * (1 - $f));
-
-    $r = 1;
-    $g = 1;
-    $b = 1;
-
-    switch ($i)
+    public static function hsv2rgb($hsv)
     {
+        extract($hsv);
+
+        $h /= 360;
+        $s /= 100;
+        $v /= 100;
+
+        $i = floor($h * 6);
+        $f = $h * 6 - $i;
+
+        $m = $v * (1 - $s);
+        $n = $v * (1 - $s * $f);
+        $k = $v * (1 - $s * (1 - $f));
+
+        $r = 1;
+        $g = 1;
+        $b = 1;
+
+        switch ($i) {
       case 0:
-        list($r,$g,$b) = array($v,$k,$m);
+        list($r, $g, $b) = [$v, $k, $m];
         break;
       case 1:
-        list($r,$g,$b) = array($n,$v,$m);
+        list($r, $g, $b) = [$n, $v, $m];
         break;
       case 2:
-        list($r,$g,$b) = array($m,$v,$k);
+        list($r, $g, $b) = [$m, $v, $k];
         break;
       case 3:
-        list($r,$g,$b) = array($m,$n,$v);
+        list($r, $g, $b) = [$m, $n, $v];
         break;
       case 4:
-        list($r,$g,$b) = array($k,$m,$v);
+        list($r, $g, $b) = [$k, $m, $v];
         break;
       case 5:
       case 6:
-        list($r,$g,$b) = array($v,$m,$n);
+        list($r, $g, $b) = [$v, $m, $n];
         break;
     }
 
-    return array(
-      'r' => floor($r*255),
-      'g' => floor($g*255),
-      'b' => floor($b*255),
-      );
-  }
+        return [
+      'r' => floor($r * 255),
+      'g' => floor($g * 255),
+      'b' => floor($b * 255),
+      ];
+    }
 }
 
 /*
  * h=hueRange
  * s=saturationRange : bounds[0][0] ; bounds[-][0]
  */
-RandomColor::$dictionary = array(
-  'monochrome' => array(
-    'bounds' => array(array(0,0), array(100,0)),
-    'h' => NULL,
-    's' => array(0,100)
-    ),
-  'red' => array(
-    'bounds' => array(array(20,100),array(30,92),array(40,89),array(50,85),array(60,78),array(70,70),array(80,60),array(90,55),array(100,50)),
-    'h' => array(-26,18),
-    's' => array(20,100)
-    ),
-  'orange' => array(
-    'bounds' => array(array(20,100),array(30,93),array(40,88),array(50,86),array(60,85),array(70,70),array(100,70)),
-    'h' => array(19,46),
-    's' => array(20,100)
-    ),
-  'yellow' => array(
-    'bounds' => array(array(25,100),array(40,94),array(50,89),array(60,86),array(70,84),array(80,82),array(90,80),array(100,75)),
-    'h' => array(47,62),
-    's' => array(25,100)
-    ),
-  'green' => array(
-    'bounds' => array(array(30,100),array(40,90),array(50,85),array(60,81),array(70,74),array(80,64),array(90,50),array(100,40)),
-    'h' => array(63,178),
-    's' => array(30,100)
-    ),
-  'blue' => array(
-    'bounds' => array(array(20,100),array(30,86),array(40,80),array(50,74),array(60,60),array(70,52),array(80,44),array(90,39),array(100,35)),
-    'h' => array(179,257),
-    's' => array(20,100)
-    ),
-  'purple' => array(
-    'bounds' => array(array(20,100),array(30,87),array(40,79),array(50,70),array(60,65),array(70,59),array(80,52),array(90,45),array(100,42)),
-    'h' => array(258,282),
-    's' => array(20,100)
-    ),
-  'pink' => array(
-    'bounds' => array(array(20,100),array(30,90),array(40,86),array(60,84),array(80,80),array(90,75),array(100,73)),
-    'h' => array(283,334),
-    's' => array(20,100)
-    )
-  );
+RandomColor::$dictionary = [
+  'monochrome' => [
+    'bounds' => [[0, 0], [100, 0]],
+    'h'      => null,
+    's'      => [0, 100],
+    ],
+  'red' => [
+    'bounds' => [[20, 100], [30, 92], [40, 89], [50, 85], [60, 78], [70, 70], [80, 60], [90, 55], [100, 50]],
+    'h'      => [-26, 18],
+    's'      => [20, 100],
+    ],
+  'orange' => [
+    'bounds' => [[20, 100], [30, 93], [40, 88], [50, 86], [60, 85], [70, 70], [100, 70]],
+    'h'      => [19, 46],
+    's'      => [20, 100],
+    ],
+  'yellow' => [
+    'bounds' => [[25, 100], [40, 94], [50, 89], [60, 86], [70, 84], [80, 82], [90, 80], [100, 75]],
+    'h'      => [47, 62],
+    's'      => [25, 100],
+    ],
+  'green' => [
+    'bounds' => [[30, 100], [40, 90], [50, 85], [60, 81], [70, 74], [80, 64], [90, 50], [100, 40]],
+    'h'      => [63, 178],
+    's'      => [30, 100],
+    ],
+  'blue' => [
+    'bounds' => [[20, 100], [30, 86], [40, 80], [50, 74], [60, 60], [70, 52], [80, 44], [90, 39], [100, 35]],
+    'h'      => [179, 257],
+    's'      => [20, 100],
+    ],
+  'purple' => [
+    'bounds' => [[20, 100], [30, 87], [40, 79], [50, 70], [60, 65], [70, 59], [80, 52], [90, 45], [100, 42]],
+    'h'      => [258, 282],
+    's'      => [20, 100],
+    ],
+  'pink' => [
+    'bounds' => [[20, 100], [30, 90], [40, 86], [60, 84], [80, 80], [90, 75], [100, 73]],
+    'h'      => [283, 334],
+    's'      => [20, 100],
+    ],
+  ];

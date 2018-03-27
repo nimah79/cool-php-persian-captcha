@@ -1,22 +1,18 @@
 <?php
 /**
- * Sample script for Persian CAPTCHA generation and validation
+ * Sample script for Persian CAPTCHA generation and validation.
  *
  * @author  Jose Rodriguez <josecl@gmail.com>
  * @author  Nima HeydariNasab (added Persian support)
  * @license GPLv3
- * @package captcha
+ *
  * @version 0.5
  *
  *
  * This is an example file with a simplified implementation
  * of the captcha for demonstration purposes.
- *
  */
-
-
 session_start();
-
 
 ?>
 <!DOCTYPE html>
@@ -39,10 +35,10 @@ body { font-family: Arial, sans-serif; padding: 20px; }
 if (!empty($_REQUEST['captcha'])) {
     if (empty($_SESSION['captcha']) || trim(strtolower($_REQUEST['captcha'])) != $_SESSION['captcha']) {
         $captcha_message = 'متن واردشده اشتباه بود!';
-        $style = "background-color: #FF606C";
+        $style = 'background-color: #FF606C';
     } else {
         $captcha_message = 'متن واردشده صحیح بود!';
-        $style = "background-color: #CCFF99";
+        $style = 'background-color: #CCFF99';
     }
 
     $request_captcha = htmlspecialchars($_REQUEST['captcha']);
@@ -64,7 +60,6 @@ if (!empty($_REQUEST['captcha'])) {
 HTML;
     unset($_SESSION['captcha']);
 }
-
 
 ?>
 
